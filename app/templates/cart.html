@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Cart – ShopEasy{% endblock %}
+
+{% block content %}
+<h1>Your Cart</h1>
+<div id="cart-root"></div>
+
+<script>
+  function renderCart(data) {
+    const root = document.getElementById('cart-root');
+    if (data.item_count === 0) {
+      root.innerHTML = `
+        <div class="empty-state" id="empty-cart-state">
+          <p id="empty-cart-message">Your cart is empty.</p>
+          <a href="/" class="btn btn-secondary">Continue Shopping</a>
+        </div>`;
+      return;
+    }
+
+    const rows = data.items.map(item => `
+      <tr class="cart-item" data-product-id="${item.id}">
+        <td class="item-name">${item.name}</td>
+        <td class="item-price">$${item.price.toFixed(2)}</td>
+        <td class="item-quantity">${item.quantity}</td>
+        <td class="item-subtotal">$${item.subtotal.toFixed(2)}</td>
+        <td>
+          <button class="remove-btn" onclick="removeFromCart(${item.id}, this)">Remove</button>
+        </td>
+      </tr>`).join('');
+
+    root.innerHTML = `
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="cart-body">${rows}</tbody>
+      </table>
+      <div class="cart-summary" id="cart-summary">
+        <p id="cart-total">Total: $${data.total.toFixed(2)}</p>
+        <a href="/checkout"><button id="checkout-btn">Proceed to Checkout</button></a>
+      </div>`;
+  }
+
+  async function removeFromCart(productId, btn) {
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const res = await fetch(`/api/cart/${productId}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Could not remove item.');
+        btn.disabled = false;
+        btn.textContent = 'Remove';
+        return;
+      }
+      renderCart(await res.json());
+    } catch {
+      alert('Network error — please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Remove';
+    }
+  }
+
+  async function loadCart() {
+    try {
+      const res = await fetch('/api/cart', { credentials: 'same-origin' });
+      if (!res.ok) throw new Error();
+      renderCart(await res.json());
+    } catch {
+      document.getElementById('cart-root').innerHTML =
+        '<p style="color:var(--danger)">Could not load cart. Please refresh.</p>';
+    }
+  }
+
+  loadCart();
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Product – ShopEasy{% endblock %}
+
+{% block content %}
+<a href="/" class="back-link">&larr; Back to Products</a>
+<br/><br/>
+<div id="product-detail" data-product-id="{{ product_id }}"></div>
+
+<script>
+  async function addToCart(productId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+    try {
+      const res = await fetch(`/api/cart/${productId}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (res.ok) {
+        window.location.href = '/cart';
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Could not add item to cart.');
+        btn.disabled = false;
+        btn.textContent = 'Add to Cart';
+      }
+    } catch {
+      alert('Network error — please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Add to Cart';
+    }
+  }
+
+  async function loadProduct() {
+    const container = document.getElementById('product-detail');
+    const productId = container.dataset.productId;
+    try {
+      const res = await fetch(`/api/products/${productId}`, { credentials: 'same-origin' });
+      if (!res.ok) {
+        container.innerHTML = '<p style="color:var(--danger)">Product not found.</p>';
+        return;
+      }
+      const p = await res.json();
+
+      // Update page title once we have the name
+      document.title = `${p.name} – ShopEasy`;
+
+      const inStock = p.stock > 0;
+      const badgeClass = inStock ? 'badge-in-stock' : 'badge-out-stock';
+      const stockText  = inStock ? `In Stock (${p.stock} available)` : 'Out of Stock';
+
+      container.innerHTML = `
+        <h2 class="product-name">${p.name}</h2>
+        <p class="product-price">$${p.price.toFixed(2)}</p>
+        <p class="product-category">Category: ${p.category}</p>
+        <span class="badge ${badgeClass} product-stock">${stockText}</span>
+        <div style="margin-top:1.25rem;">
+          <button class="add-to-cart-btn" onclick="addToCart(${p.id}, this)">
+            Add to Cart
+          </button>
+        </div>`;
+    } catch {
+      container.innerHTML = '<p style="color:var(--danger)">Could not load product. Please refresh.</p>';
+    }
+  }
+
+  loadProduct();
+</script>
+{% endblock %}

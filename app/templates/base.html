@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ShopEasy{% endblock %}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #5c4033;       /* warm brown */
+      --primary-dark: #3e2a20;  /* deep espresso */
+      --success: #3a5a40;       /* dark forest green */
+      --danger: #8b3a2a;        /* muted terracotta-red */
+      --warning: #a0733a;       /* amber-brown */
+      --gray-50: #f5f0e8;       /* warm beige background */
+      --gray-100: #ede5d8;      /* light sand */
+      --gray-200: #d9cfc0;      /* medium sand border */
+      --gray-400: #a89880;      /* muted tan */
+      --gray-600: #6b5b4e;      /* warm mid-brown text */
+      --gray-800: #2e1f15;      /* deep brown text */
+      --white: #fdfaf5;         /* off-white / cream */
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(60,35,20,.1), 0 1px 2px rgba(60,35,20,.06);
+      --shadow-md: 0 4px 6px rgba(60,35,20,.08), 0 2px 4px rgba(60,35,20,.06);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--primary);
+      color: var(--white);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .logo span { opacity: 0.75; font-weight: 400; }
+
+    nav a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    nav a:hover { background: rgba(255,255,255,0.15); }
+
+    nav a + a { margin-left: 0.25rem; }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--gray-800); }
+    h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+    }
+
+    /* ── Product grid ── */
+    #product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+
+    .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+    .product-card h3 { font-size: 1rem; font-weight: 600; }
+
+    .product-name { color: var(--primary); text-decoration: none; }
+    .product-name:hover { text-decoration: underline; }
+
+    .product-price {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+    }
+
+    .badge-in-stock  { background: #d4e6d4; color: var(--success); }
+    .badge-out-stock { background: #e8d5ce; color: var(--danger); }
+
+    .product-card form { margin-top: auto; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1.1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-primary   { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-danger    { background: var(--danger); color: var(--white); }
+    .btn-danger:hover { opacity: 0.85; }
+
+    .btn-secondary { background: var(--gray-100); color: var(--gray-800); border: 1px solid var(--gray-200); }
+    .btn-secondary:hover { background: var(--gray-200); }
+
+    .btn-full { width: 100%; }
+
+    .add-to-cart-btn { background: var(--primary); color: var(--white); }
+    .add-to-cart-btn:hover { background: var(--primary-dark); }
+    .add-to-cart-btn, .remove-btn, #checkout-btn, #place-order-btn {
+      padding: 0.45rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .remove-btn { background: var(--gray-100); color: var(--danger); border: 1px solid var(--gray-200); }
+    .remove-btn:hover { background: #fee2e2; }
+    #checkout-btn { background: var(--primary); color: var(--white); padding: 0.65rem 1.5rem; font-size: 1rem; }
+    #checkout-btn:hover { background: var(--primary-dark); }
+    #place-order-btn { background: var(--success); color: var(--white); padding: 0.65rem 1.5rem; font-size: 1rem; }
+    #place-order-btn:hover { opacity: 0.9; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    thead { background: var(--gray-50); }
+    th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--gray-100); font-size: 0.9rem; }
+    th { font-weight: 600; color: var(--gray-600); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--gray-50); }
+
+    /* ── Cart total ── */
+    .cart-summary {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    #cart-total { font-size: 1.15rem; font-weight: 700; }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--gray-600); margin-bottom: 0.35rem; }
+    .form-group input {
+      width: 100%;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: var(--gray-800);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(92,64,51,0.15);
+    }
+
+    /* ── Alerts ── */
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .alert-danger  { background: #e8d5ce; color: var(--danger); border: 1px solid #d4b5aa; }
+    .alert-success { background: #d4e6d4; color: var(--success); border: 1px solid #b0ccb0; }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--gray-400); }
+    .empty-state p { font-size: 1rem; margin-bottom: 1rem; }
+
+    /* ── Confirmation / 404 ── */
+    .centered-box {
+      max-width: 500px;
+      margin: 4rem auto;
+      text-align: center;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 3rem 2rem;
+    }
+    .centered-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .centered-box h1 { margin-bottom: 0.75rem; }
+    .centered-box p { color: var(--gray-600); margin-bottom: 1.5rem; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      border-top: 1px solid var(--gray-200);
+      background: var(--white);
+    }
+
+    /* ── Back link ── */
+    .back-link { color: var(--primary); text-decoration: none; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Product detail ── */
+    #product-detail {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      max-width: 600px;
+    }
+    #product-detail .product-price { font-size: 1.5rem; margin: 0.5rem 0; }
+    #product-detail .product-category { color: var(--gray-600); font-size: 0.875rem; margin-bottom: 0.5rem; }
+    #product-detail form { margin-top: 1.25rem; }
+
+    .checkout-wrapper {
+      max-width: 520px;
+    }
+    .checkout-wrapper .card { padding: 1.75rem; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">Shop<span>Easy</span></a>
+    <nav>
+      <a href="/">Products</a>
+      <a href="/cart" id="cart-link">Cart</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    &copy; 2024 ShopEasy &mdash; QA Exercise Application
+  </footer>
+</body>
+</html>

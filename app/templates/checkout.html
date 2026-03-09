@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout – ShopEasy{% endblock %}
+
+{% block content %}
+<div class="checkout-wrapper">
+  <h1>Checkout</h1>
+
+  <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+
+  <div class="card">
+    <form id="checkout-form">
+      <div class="form-group">
+        <label for="input-name">Full Name</label>
+        <input type="text" name="name" id="input-name" placeholder="Jane Smith" />
+      </div>
+      <div class="form-group">
+        <label for="input-email">Email</label>
+        <input type="email" name="email" id="input-email" placeholder="jane@example.com" />
+      </div>
+      <div class="form-group">
+        <label for="input-address">Shipping Address</label>
+        <input type="text" name="address" id="input-address" placeholder="123 Main St, City, Country" />
+      </div>
+      <button type="submit" id="place-order-btn" style="width:100%;margin-top:0.5rem;">Place Order</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('place-order-btn');
+    const errorEl = document.getElementById('error-message');
+
+    btn.disabled = true;
+    btn.textContent = 'Placing order…';
+    errorEl.style.display = 'none';
+
+    const payload = {
+      name:    document.getElementById('input-name').value,
+      email:   document.getElementById('input-email').value,
+      address: document.getElementById('input-address').value,
+    };
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        window.location.href = '/order-confirmed';
+      } else {
+        errorEl.textContent = data.error || 'Something went wrong.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    } catch {
+      errorEl.textContent = 'Network error — please try again.';
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    }
+  });
+</script>
+{% endblock %}

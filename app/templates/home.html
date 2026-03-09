@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}ShopEasy – Products{% endblock %}
+
+{% block content %}
+<h1>All Products</h1>
+<div id="product-list"></div>
+
+<script>
+  async function addToCart(productId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+    try {
+      const res = await fetch(`/api/cart/${productId}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (res.ok) {
+        window.location.href = '/cart';
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Could not add item to cart.');
+        btn.disabled = false;
+        btn.textContent = 'Add to Cart';
+      }
+    } catch {
+      alert('Network error — please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Add to Cart';
+    }
+  }
+
+  async function loadProducts() {
+    const container = document.getElementById('product-list');
+    try {
+      const res = await fetch('/api/products', { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Failed to load products');
+      const products = await res.json();
+
+      container.innerHTML = products.map(p => {
+        const inStock = p.stock > 0;
+        const badgeClass = inStock ? 'badge-in-stock' : 'badge-out-stock';
+        const badgeText  = inStock ? 'In Stock' : 'Out of Stock';
+        return `
+          <div class="product-card" data-product-id="${p.id}">
+            <h3><a href="/product/${p.id}" class="product-name">${p.name}</a></h3>
+            <p class="product-price">$${p.price.toFixed(2)}</p>
+            <span class="badge ${badgeClass} product-stock">${badgeText}</span>
+            <button
+              class="add-to-cart-btn"
+              style="width:100%;margin-top:0.75rem;"
+              onclick="addToCart(${p.id}, this)">
+              Add to Cart
+            </button>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = '<p style="color:var(--danger)">Could not load products. Please refresh.</p>';
+    }
+  }
+
+  loadProducts();
+</script>
+{% endblock %}

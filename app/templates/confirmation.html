@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed – ShopEasy{% endblock %}
+
+{% block content %}
+<div class="centered-box">
+  <div class="icon">&#10003;</div>
+  <h1>Order Confirmed!</h1>
+  <p id="confirmation-message">Thank you, <strong>{{ name }}</strong>! Your order has been placed and will be shipped shortly.</p>
+  <a href="/" class="btn btn-primary">Continue Shopping</a>
+</div>
+{% endblock %}
