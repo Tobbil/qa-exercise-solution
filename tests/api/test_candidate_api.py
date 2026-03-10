@@ -36,7 +36,7 @@ def test_get_product_returns_expected_fields(api_client):
     assert "category" in data
 
 
-def test_get_product_not_found(api_client):
+def test_get_nonexistent_product_returns_404_and_error(api_client):
     session, base_url = api_client
     response = session.get(f"{base_url}/api/products/99999999")
     data = response.json()
@@ -44,7 +44,7 @@ def test_get_product_not_found(api_client):
     assert "error" in data
 
 
-def test_checkout_missing_fields(api_client):
+def test_checkout_missing_fields_returns_422_and_error(api_client):
     session, base_url = api_client
     session.post(f"{base_url}/api/cart/1")
     cart_response = session.get(f"{base_url}/api/cart")
@@ -58,7 +58,7 @@ def test_checkout_missing_fields(api_client):
     assert "error" in data
 
 
-def test_checkout_clears_cart(api_client):
+def test_checkout_clears_cart_on_success(api_client):
     session, base_url = api_client
     session.post(f"{base_url}/api/cart/1")
     cart_response = session.get(f"{base_url}/api/cart")
